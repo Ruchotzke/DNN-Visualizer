@@ -6,6 +6,6 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/DataGathering.unity
+    path: Assets/DataGathering/DataGathering.unity
     guid: d899a1024922ff740aa11cebbd3394ed
   m_configObjects: {}

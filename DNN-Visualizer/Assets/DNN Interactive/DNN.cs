@@ -11,6 +11,7 @@ public class DNN : MonoBehaviour
 
     #region PROPERTIES
     List<Layer> layers = new List<Layer>();
+    ColorDataset dataset;
     #endregion
 
     private void Awake()
@@ -18,21 +19,19 @@ public class DNN : MonoBehaviour
         /* Generate Default Network */
         layers.Add(new Layer(3, 8, 0, ActivationFunction.RELU));
         layers.Add(new Layer(8, 12, 0, ActivationFunction.RELU));
-        layers.Add(new Layer(12, 4, 0, ActivationFunction.SOFTMAX));
+        layers.Add(new Layer(12, 8, 0, ActivationFunction.SOFTMAX));
+
+        /* DEBUG: SEED THE RANDOM */
+        Random.InitState(0);
+
+        /* Load training data */
+        ColorDataset dataset = new ColorDataset();
+        dataset.AddDataset("TrainingData");
 
         /* Try an inference */
+        foreach(var data in dataset.values.Keys) { input = data; break; } //only way to "index" a dictionary. Stupid. A newer version of .net would let you do this normally
         var intermediates = DoInference();
-        Debug.Log("Intermediates count: " + intermediates.Count);
-        for (int i = 0; i < intermediates.Count; i++)
-        {
-            string print = "[";
-            for (int j = 0; j < intermediates[i].Length; j++)
-            {
-                print += intermediates[i][j] + ", ";
-            }
-
-            Debug.Log(print + "]");
-        }
+        Debug.Log("Inference Complete. Cross entropy loss: " + CrossEntropy(intermediates[intermediates.Count - 1], dataset.values[input].oneHot));
     }
 
     /// <summary>
@@ -51,5 +50,26 @@ public class DNN : MonoBehaviour
         }
 
         return intermediates;
+    }
+
+    /// <summary>
+    /// Calculate the cross-entropy loss for a given set of probabilities.
+    /// </summary>
+    /// <param name="probability">The output probabilities.</param>
+    /// <param name="truth">The true values.</param>
+    /// <returns>The cross entropy loss between the two vectors.</returns>
+    float CrossEntropy(float[] probability, float[] truth)
+    {
+        float total = 0.0f;
+        for (int i = 0; i < probability.Length; i++)
+        {
+            Debug.Log("X" + i + ": " + truth[i]);
+            if(truth[i] != 0.0f)
+            {
+                total += truth[i] * Mathf.Log(probability[i], 2);
+            }
+        }
+
+        return -1 * total;
     }
 }

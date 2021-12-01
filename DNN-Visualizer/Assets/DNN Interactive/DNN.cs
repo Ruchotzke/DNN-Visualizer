@@ -10,7 +10,7 @@ public class DNN : MonoBehaviour
     #endregion
 
     #region PROPERTIES
-    List<Layer> layers = new List<Layer>();
+    public List<Layer> layers = new List<Layer>();
     ColorDataset dataset;
     #endregion
 
@@ -63,7 +63,6 @@ public class DNN : MonoBehaviour
         float total = 0.0f;
         for (int i = 0; i < probability.Length; i++)
         {
-            Debug.Log("X" + i + ": " + truth[i]);
             if(truth[i] != 0.0f)
             {
                 total += truth[i] * Mathf.Log(probability[i], 2);

@@ -13,11 +13,11 @@ namespace DNNElements
     public class Layer
     {
         /* Layer Properties */
-        int inputSize;
-        int size;
-        float[] weights;    /* Weights are stored in output major order - i.e. index = outputIndex * inputSize + weightIndex */
-        float bias;
-        ActivationFunction activationFunction;
+        public int inputSize;
+        public int size;
+        public float[] weights;    /* Weights are stored in output major order - i.e. index = outputIndex * inputSize + weightIndex */
+        public float bias;
+        public ActivationFunction activationFunction;
 
         public Layer(int inputSize, int size, float bias = 0.0f, ActivationFunction activationFunction = ActivationFunction.RELU)
         {

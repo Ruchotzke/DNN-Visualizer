@@ -12,6 +12,7 @@ public class DNN : MonoBehaviour
     #region PROPERTIES
     public List<Layer> layers = new List<Layer>();
     ColorDataset dataset;
+    LayerLayout layout;
     #endregion
 
     private void Awake()
@@ -22,16 +23,22 @@ public class DNN : MonoBehaviour
         layers.Add(new Layer(12, 8, 0, ActivationFunction.SOFTMAX));
 
         /* DEBUG: SEED THE RANDOM */
-        Random.InitState(0);
+        //Random.InitState(0);
 
         /* Load training data */
         ColorDataset dataset = new ColorDataset();
         dataset.AddDataset("TrainingData");
 
+        /* Find the layer layout */
+        layout = FindObjectOfType<LayerLayout>();
+        layout.InitializeLayout(this);
+
         /* Try an inference */
         foreach(var data in dataset.values.Keys) { input = data; break; } //only way to "index" a dictionary. Stupid. A newer version of .net would let you do this normally
         var intermediates = DoInference();
         Debug.Log("Inference Complete. Cross entropy loss: " + CrossEntropy(intermediates[intermediates.Count - 1], dataset.values[input].oneHot));
+        layout.UpdateLayout(intermediates);
+        
     }
 
     /// <summary>

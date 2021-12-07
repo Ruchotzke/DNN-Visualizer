@@ -1,3 +1,4 @@
+using DNNElements;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -11,29 +12,28 @@ public class LayerLayout : MonoBehaviour
     public GameObject pf_Layer;
     public Neuron pf_Neuron;
     public UILineRenderer pf_LineRenderer;
+    public Label pf_Label;
 
     [Header("Containers")]
     public Transform LayerContainer;
     public Transform LineRendererContainer;
+    public Transform LabelContainer;
+
+    [Header("Elements")]
+    public Image ColorDisplay;
     #endregion
 
     #region PROPERTIES
     DNN dnn;
     List<List<Neuron>> neurons = new List<List<Neuron>>();
+    List<Label> outputs = new List<Label>();
     #endregion
 
-    private void Awake()
+    public void InitializeLayout(DNN dnn)
     {
-        dnn = FindObjectOfType<DNN>();
-    }
+        /* Remember the dnn that called this */
+        this.dnn = dnn;
 
-    private void Start()
-    {
-        UpdateLayout();
-    }
-
-    public void UpdateLayout()
-    {
         /* First generate an input layer */
         Transform inputLayer = Instantiate(pf_Layer, LayerContainer).transform;
         inputLayer.name = "Input layer";
@@ -92,6 +92,41 @@ public class LayerLayout : MonoBehaviour
                     neurons[i][outNeuron].AddLine(lr);
                 }
             }
+        }
+
+        /* Generate a label for each output */
+        int output = 0;
+        foreach(var neuron in neurons[neurons.Count - 1])
+        {
+            var label = Instantiate(pf_Label, LabelContainer);
+            label.outputIndex = output++;
+            label.name.text = ((ColorChoices)label.outputIndex).ToString();
+            outputs.Add(label);
+        }
+    }
+
+    public void UpdateLayout(List<float[]> layerData)
+    {
+        /* Set the input color */
+        ColorDisplay.color = new Color(layerData[0][0], layerData[0][1], layerData[0][2]);
+
+        /* Color the line segments by their corresponding activation */
+        for(int layerIndex = 0; layerIndex < neurons.Count - 1; layerIndex++)
+        {
+            int neuronIndex = 0;
+            Debug.Log(layerIndex);
+            foreach (var neuron in neurons[layerIndex])
+            {
+                float[] weights = dnn.layers[layerIndex].weights;
+                neuron.UpdateColors(layerData[layerIndex][neuronIndex], weights);
+                neuronIndex += 1;
+            }
+        }
+
+        /* Set the output label values */
+        for (int i = 0; i < outputs.Count; i++)
+        {
+            outputs[i].percent.text = layerData[layerData.Count - 1][i].ToString("f2");
         }
     }
 }

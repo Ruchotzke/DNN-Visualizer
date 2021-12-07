@@ -34,4 +34,20 @@ public class Neuron : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
         outputConnections.Add(line);
         originalColors.Add(line.color);
     }
+
+    public void UpdateColors(float activation, float[] weights)
+    {
+        for (int i = 0; i < outputConnections.Count; i++)
+        {
+            outputConnections[i].color = Color.Lerp(Color.black, Color.white, activation * weights[i] / 5f);
+        }
+    }
+
+    public void ResetColors()
+    {
+        for(int i = 0; i < outputConnections.Count; i++)
+        {
+            outputConnections[i].color = originalColors[i];
+        }
+    }
 }

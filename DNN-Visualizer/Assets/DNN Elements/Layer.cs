@@ -16,16 +16,23 @@ namespace DNNElements
         public int inputSize;
         public int size;
         public float[] weights;    /* Weights are stored in output major order - i.e. index = outputIndex * inputSize + weightIndex */
-        public float bias;
+        public float[] bias;       /* Each "neuron" has its own bias */
         public ActivationFunction activationFunction;
 
-        public Layer(int inputSize, int size, float bias = 0.0f, ActivationFunction activationFunction = ActivationFunction.RELU)
+        public Layer(int inputSize, int size, float[] bias = null, ActivationFunction activationFunction = ActivationFunction.RELU)
         {
             /* Default Applications */
             this.inputSize = inputSize;
             this.size = size;
-            this.bias = bias;
             this.activationFunction = activationFunction;
+            if(bias == null)
+            {
+                this.bias = new float[size];
+            }
+            else
+            {
+                this.bias = bias;
+            }
 
             /* Randomly generate weights to initialize them */
             weights = new float[inputSize * size];
@@ -42,7 +49,7 @@ namespace DNNElements
             for (int outputIndex = 0; outputIndex < output.Length; outputIndex++)
             {
                 /* MAC */
-                output[outputIndex] = bias;
+                output[outputIndex] = bias[outputIndex];
                 for (int weightIndex = 0; weightIndex < inputSize; weightIndex++)
                 {
                     output[outputIndex] += weights[outputIndex * inputSize + weightIndex] * input[weightIndex];

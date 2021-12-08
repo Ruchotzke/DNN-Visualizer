@@ -638,10 +638,11 @@ MonoBehaviour:
   pf_Layer: {fileID: 3741733625279901422, guid: 93ce1425770abe643a059b70bb3d279c, type: 3}
   pf_Neuron: {fileID: 5543719007236068838, guid: f896a6d24041a3d4d855312b01d78022, type: 3}
   pf_LineRenderer: {fileID: 7634059161463381732, guid: 46f312abb3b69db42b64d4158e04f330, type: 3}
-  pf_Label: {fileID: 610341565097627408, guid: 0da1fa8e83d446c4db27046126da7365, type: 3}
+  pf_Label: {fileID: 8062147254325926517, guid: 0da1fa8e83d446c4db27046126da7365, type: 3}
   LayerContainer: {fileID: 905687112}
   LineRendererContainer: {fileID: 556164744}
   LabelContainer: {fileID: 629658630}
+  ColorDisplay: {fileID: 0}
 --- !u!1 &2142425825
 GameObject:
   m_ObjectHideFlags: 0
@@ -671,7 +672,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 372a021eeca48914f99612103870b19b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  input: {r: 1, g: 0, b: 0, a: 1}
+  input:
+  - 0.1
+  - 0.7
   layers: []
 --- !u!4 &2142425827
 Transform:

@@ -100,7 +100,7 @@ public class LayerLayout : MonoBehaviour
         {
             var label = Instantiate(pf_Label, LabelContainer);
             label.outputIndex = output++;
-            label.name.text = ((ColorChoices)label.outputIndex).ToString();
+            label.label_name.text = ((ColorChoices)label.outputIndex).ToString();
             outputs.Add(label);
         }
     }

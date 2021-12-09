@@ -6,6 +6,6 @@ using UnityEngine;
 public class Label : MonoBehaviour
 {
     public int outputIndex;
-    public TextMeshProUGUI name;
+    public TextMeshProUGUI label_name;
     public TextMeshProUGUI percent;
 }

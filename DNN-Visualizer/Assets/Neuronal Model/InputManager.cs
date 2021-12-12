@@ -39,6 +39,10 @@ namespace neuronal
             Vector2 mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             RaycastHit2D hitinfo = Physics2D.Raycast(mousePosition, Vector2.zero);
 
+            /* If we are over a UI component, ignore any mouse actions */
+            if (UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject()) return;
+
+            /* Handle the mouse actions */
             if (Input.GetMouseButtonDown(0))
             {
                 switch (input_state)
@@ -55,6 +59,16 @@ namespace neuronal
                         }
                         break;
                     case INPUT_STATE.REMOVE_NEURON:
+                        if (hitinfo.collider != null)
+                        {
+                            Neuron clicked = hitinfo.collider.gameObject.GetComponent<Neuron>();
+                            if(clicked != null)
+                            {
+                                Model.neuronList.Remove(clicked);
+                                Model.inputNeurons.Remove(clicked);
+                                Destroy(clicked.gameObject);
+                            }
+                        }
                         break;
                     case INPUT_STATE.CONNECT_NEURON:
                         break;

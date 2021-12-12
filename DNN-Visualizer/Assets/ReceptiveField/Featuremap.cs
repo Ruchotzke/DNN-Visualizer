@@ -57,7 +57,7 @@ namespace ReceptiveFields
             texture.Apply();
         }
 
-        Vector2Int? prevCell = null;
+        //Vector2Int? prevCell = null;
 
         private void Update()
         {

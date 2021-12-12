@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 
-namespace DNN
+namespace DNN_V2
 {
     public class Layer
     {
@@ -22,7 +22,7 @@ namespace DNN
             }
         }
 
-        public float[] Inference()
+        virtual public float[] Inference()
         {
             float[] ret = new float[Neurons.Length];
 
@@ -32,6 +32,20 @@ namespace DNN
             }
 
             return ret;
+        }
+    }
+
+    public class InputLayer : Layer
+    {
+        DNN dnn;
+        public InputLayer(int size, DNN parent) : base(0, size, ActivationFunction.SIGMOID)
+        {
+            dnn = parent;
+        }
+
+        public override float[] Inference()
+        {
+            return dnn.input;
         }
     }
 }

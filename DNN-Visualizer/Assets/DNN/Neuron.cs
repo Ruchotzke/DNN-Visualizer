@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace DNN
+namespace DNN_V2
 {
     public class Neuron
     {
@@ -39,7 +39,8 @@ namespace DNN
                 {
                     output += Inputs[i] * Weights[i];
                 }
-                output = activationFunction.Evaluate(output);
+                
+                if(activationFunction != ActivationFunction.SOFTMAX) output = activationFunction.Evaluate(output);
 
                 return output;
             }

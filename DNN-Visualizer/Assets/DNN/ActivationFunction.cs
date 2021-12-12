@@ -5,11 +5,14 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 
-namespace DNN
+namespace DNN_V2
 {
+    [System.Serializable]
     public enum ActivationFunction
     {
-        SIGMOID
+        SIGMOID,
+        RELU,
+        SOFTMAX
     }
 
     public static class ActivationFunctionExtensions
@@ -26,9 +29,35 @@ namespace DNN
             {
                 case ActivationFunction.SIGMOID:
                     return 1.0f / (1.0f + Mathf.Exp(-value));
+                case ActivationFunction.RELU:
+                    return Mathf.Max(0.0f, value);
+                case ActivationFunction.SOFTMAX:
+                    Debug.LogError("CANT EVALUATE SOFTMAX ON A SINGLE OUTPUT");
+                    return float.NaN; 
                 default:
                     return 0.0f;
             }
+        }
+
+        public static float[] EvaluateMultiple(this ActivationFunction func, float[] values)
+        {
+            if (func != ActivationFunction.SOFTMAX) return null;
+
+            float[] ret = new float[values.Length];
+            float sum = 0.0f;
+            for (int i = 0; i < values.Length; i++)
+            {
+                float exp = Mathf.Exp(values[i]);
+                ret[i] = exp;
+                sum += exp;
+            }
+
+            for(int i = 0; i < values.Length; i++)
+            {
+                ret[i] /= sum;
+            }
+
+            return ret;
         }
 
         /// <summary>

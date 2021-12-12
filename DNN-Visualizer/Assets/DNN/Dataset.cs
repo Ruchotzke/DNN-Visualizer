@@ -4,7 +4,7 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 
-namespace DNN
+namespace DNN_V2
 {
     public class Dataset
     {
@@ -20,7 +20,7 @@ namespace DNN
         private static Dataset _singleton;
         #endregion
     
-        public List<(float[] input, float output)> Values = new List<(float[] input, float output)>();
+        public List<(float[] input, float[] output)> Values = new List<(float[] input, float[] output)>();
 
         private Dataset()
         {
@@ -39,17 +39,17 @@ namespace DNN
                 };
 
                 /* Generate an Output */
-                float output = (i % 3 == 0) ? 1.0f : 0.0f;
+                float[] output = (i % 3 == 0) ? new float[]{0.0f, 1.0f } : new float[]{1.0f, 0.0f };
 
                 /* Save the data */
                 Values.Add((input, output));
             }
         }
 
-        public (List<(float[] input, float output)> training, List<(float[] input, float output)> validation) DivideSet()
+        public (List<(float[] input, float[] output)> training, List<(float[] input, float[] output)> validation) DivideSet()
         {
-            List<(float[] input, float output)> training = new List<(float[] input, float output)>();
-            List<(float[] input, float output)> validation = new List<(float[] input, float output)>();
+            List<(float[] input, float[] output)> training = new List<(float[] input, float[] output)>();
+            List<(float[] input, float[] output)> validation = new List<(float[] input, float[] output)>();
 
             byte numValidation = (byte)(byte.MaxValue * 0.2f);
 

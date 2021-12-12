@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-namespace DNN
+namespace DNN_V2
 {
 
     /// <summary>
@@ -10,99 +10,94 @@ namespace DNN
     /// </summary>
     public class DNN : MonoBehaviour
     {
-        List<Layer> layers = new List<Layer>();
-        float[] input;
+        public List<Layer> layers = new List<Layer>();
+        public float[] input;
         Dataset dataset;
-        float learningRate = 0.1f;
+        public float learningRate = 0.1f;
 
         [SerializeField] LineRenderer lr_loss;
         [SerializeField] LineRenderer lr_acc;
 
         private void Awake()
         {
-            /* Seed the random for testing */
+            ///* Seed the random for testing */
 
-            /* Get the dataset */
-            dataset = Dataset.Instance;
+            ///* Get the dataset */
+            //dataset = Dataset.Instance;
 
-            /* Create a model */
-            layers.Add(new Layer(8, 12, ActivationFunction.SIGMOID));
-            layers.Add(new Layer(12, 120, ActivationFunction.SIGMOID));
-            layers.Add(new Layer(120, 8, ActivationFunction.SIGMOID));
-            layers.Add(new Layer(8, 2, ActivationFunction.SIGMOID));
-            layers.Add(new Layer(2, 1, ActivationFunction.SIGMOID));
+            ///* Create a model */
+            //layers.Add(new Layer(8, 12, ActivationFunction.SIGMOID));
+            //layers.Add(new Layer(12, 120, ActivationFunction.SIGMOID));
+            //layers.Add(new Layer(120, 8, ActivationFunction.SIGMOID));
+            //layers.Add(new Layer(8, 2, ActivationFunction.SIGMOID));
 
-            ///* TEST: Array inputs */
-            //input = new float[8]{ 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
-            //Debug.Log(DoInference());
-            //input = new float[8] { 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f };
-            //Debug.Log(DoInference());
+            /////* TEST: Array inputs */
 
+            //const int SET_SIZE = 10;
+            //List<float> lossOverTime = new List<float>();
+            //List<float> accuracyOverTime = new List<float>();
+            //for (int epoch = 0; epoch < 100; epoch++)
+            //{
+            //    /* Perform inferences and backprop */
+            //    for (int i = 0; i < SET_SIZE; i++)
+            //    {
+            //        input = dataset.Values[i].input;
+            //        float[] inference = DoInference();
+            //        DoBackpropagation(inference, dataset.Values[i].output);
+            //    }
 
-            /* Compute an inference */
-            List<float> lossOverTime = new List<float>();
-            List<float> accuracyOverTime = new List<float>();
-            for (int i = 0; i < 40; i++)
-            {
-                int TEST_INPUTS = 6;
-                /* Do training on all inputs */
-                List<float> outputs = new List<float>();
-                List<float> actual = new List<float>();
-                for (int inputIndex = 0; inputIndex < TEST_INPUTS; inputIndex++)
-                {
-                    input = dataset.Values[inputIndex].input;
-                    float inference = DoInference();
-                    outputs.Add(inference);
-                    actual.Add(dataset.Values[inputIndex].output);
-                    DoBackpropagation(outputs, actual);
-                    outputs.Clear();
-                    actual.Clear();
-                }
+            //    /* Profile this round of training */
+            //    float loss = 0.0f;
+            //    float acc = (float)SET_SIZE;
+            //    for (int i = 0; i < SET_SIZE - 1; i++)
+            //    {
+            //        input = dataset.Values[i].input;
+            //        float[] inference = DoInference();
+            //        loss += CrossEntropyLoss(inference, dataset.Values[i].output);
 
-                /* Compute output values */
-                float loss = 0.0f;
-                int correct = 0;
-                for (int testIndex = 0; testIndex < TEST_INPUTS; testIndex++)
-                {
-                    input = dataset.Values[testIndex].input;
-                    float inference = DoInference();
-                    Debug.Log("Input: [" + string.Join(", ", input) + "]    Output: " + inference);
-                    //Debug.Log(testIndex + "   " + Loss(inference, dataset.Values[testIndex].output));
-                    loss += Loss(inference, dataset.Values[testIndex].output);
-                    if (Mathf.Round(inference) == dataset.Values[testIndex].output) correct += 1;
-                }
-                loss /= TEST_INPUTS;
+            //        for (int j = 0; j < inference.Length; j++)
+            //        {
+            //            if (inference[j] != dataset.Values[i].output[j])
+            //            {
+            //                acc -= 1.0f;
+            //                break;
+            //            }
+            //        }
+            //    }
+            //    loss /= SET_SIZE;
+            //    acc /= SET_SIZE;
+            //    lossOverTime.Add(loss);
+            //    accuracyOverTime.Add(acc);
+            //    Debug.Log("Epoch " + epoch + " complete. Loss: " + loss + " Accuracy: " + acc);
 
-                lossOverTime.Add(loss);
-                accuracyOverTime.Add((float)correct / (float)TEST_INPUTS);
-                Debug.Log("Accuracy: " + (float)correct / (float)TEST_INPUTS);
-            }
+            //}
 
-            /* display the loss and accuracy over time */
-            Vector3[] points = new Vector3[accuracyOverTime.Count];
-            for (int i = 0; i < accuracyOverTime.Count; i++)
-            {
-                points[i] = new Vector3(Mathf.Lerp(-8.0f, 8.0f, i / (float)(accuracyOverTime.Count - 1)), 2.0f * accuracyOverTime[i], 0.0f);
-            }
-            lr_acc.positionCount = points.Length;
-            lr_acc.SetPositions(points);
+            ///* display the loss and accuracy over time */
+            //Vector3[] points = new Vector3[accuracyOverTime.Count];
+            //for (int i = 0; i < accuracyOverTime.Count; i++)
+            //{
+            //    points[i] = new Vector3(Mathf.Lerp(-8.0f, 8.0f, i / (float)(accuracyOverTime.Count - 1)), 2.0f * accuracyOverTime[i], 0.0f);
+            //}
+            //lr_acc.positionCount = points.Length;
+            //lr_acc.SetPositions(points);
 
-            points = new Vector3[lossOverTime.Count];
-            for (int i = 0; i < lossOverTime.Count; i++)
-            {
-                points[i] = new Vector3(Mathf.Lerp(-8.0f, 8.0f, i / (float)(lossOverTime.Count - 1)), 2.0f * lossOverTime[i], 0.0f);
-            }
-            lr_loss.positionCount = points.Length;
-            lr_loss.SetPositions(points);
+            //points = new Vector3[lossOverTime.Count];
+            //for (int i = 0; i < lossOverTime.Count; i++)
+            //{
+            //    points[i] = new Vector3(Mathf.Lerp(-8.0f, 8.0f, i / (float)(lossOverTime.Count - 1)), 2.0f * lossOverTime[i], 0.0f);
+            //}
+            //lr_loss.positionCount = points.Length;
+            //lr_loss.SetPositions(points);
 
         }
 
-        public float DoInference()
+        public float[] DoInference()
         {
             /* Move forward through layers */
-            float[] intermediate = input;
+            float[] intermediate = layers[0].Inference(); //should be an input layer
+
             //Debug.Log("[" + string.Join(", ", intermediate) + "]");
-            for(int i = 0; i < layers.Count - 1; i++)
+            for(int i = 1; i < layers.Count - 1; i++)
             {
                 intermediate.CopyTo(layers[i].LayerInput, 0);
                 intermediate = layers[i].Inference();
@@ -112,20 +107,25 @@ namespace DNN
             /* Return the final layer's output */
             intermediate.CopyTo(layers[layers.Count - 1].LayerInput, 0);
             //Debug.Log("[" + string.Join(", ", layers[layers.Count - 1].Inference()) + "]");
-            return layers[layers.Count - 1].Inference()[0];
+            return layers[layers.Count - 1].Inference();
         }
 
-        public void DoBackpropagation(List<float> output, List<float> actual)
+        public void DoBackpropagation(float[] output, float[] actual)
         {
             /* Start with the complete output */
-            float outputError = layers[layers.Count - 1].Neurons[0].activationFunction.Derivative(layers[layers.Count - 1].Neurons[0].Output) * LossDerivative(output, actual);
-            layers[layers.Count - 1].Neurons[0].UpdateParameters(outputError, learningRate);
+            float[] outputError = new float[output.Length];
+            for (int i = 0; i < output.Length; i++)
+            {
+                outputError[i] = layers[layers.Count - 1].Neurons[i].activationFunction.Derivative(layers[layers.Count - 1].Neurons[0].Output) * CrossEntropyLossDerivative(output[i], actual[i]);
+                layers[layers.Count - 1].Neurons[i].UpdateParameters(outputError[i], learningRate);
+            }
+            
 
             /* Update the hidden layers */
             /* For each layer moving backwards, calculate error */
             /* We are always fully connected, meaning we can sum the errors of a layer to get its effect on the next layer */
-            float[] previousError = new float[1] { outputError };
-            for (int layer = layers.Count - 2; layer >= 0; layer--)
+            float[] previousError = outputError;
+            for (int layer = layers.Count - 2; layer > 0; layer--) //> 0, we don't want to impact the input layer
             {
                 float[] currError = new float[layers[layer].Neurons.Length];
                 /* For each neuron in the layer, compute a local output error */
@@ -156,12 +156,42 @@ namespace DNN
             return -1 * (actual * Mathf.Log(output) + (1-actual)*Mathf.Log(1 - output));
         }
 
+        public float CrossEntropyLoss(float[] output, float[] actual)
+        {
+            float total = 0.0f;
+            for (int i = 0; i < output.Length; i++)
+            {
+                if (actual[i] != 0.0f)
+                {
+                    total += actual[i] * Mathf.Log(output[i]);
+                }
+            }
+
+            return -1 * total;
+        }
+
+        public float CrossEntropyLossDerivative(float output, float actual)
+        {
+            return -1f * actual / output;
+        }
+
         public float LossDerivative(float output, float actual)
         {
             return -1.0f * (actual / output - (1 - actual) / (1 - output));
         }
 
-        public float LossDerivative(List<float> outputs, List<float> actual)
+        public float[] LossDerivative(float[] output, float[] actual)
+        {
+            float[] losses = new float[output.Length];
+            for(int i = 0; i < output.Length; i++)
+            {
+                losses[i] = LossDerivative(output[i], actual[i]);
+            }
+
+            return losses;
+        }
+
+        public float BatchedLossDerivative(List<float> outputs, List<float> actual)
         {
             float error = 0.0f;
             for(int i = 0; i < outputs.Count; i++)

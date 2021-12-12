@@ -81,6 +81,13 @@ namespace DNNElements
                     output[i] /= sum;
                 }
             }
+            else if(activationFunction == ActivationFunction.SIGMOID)
+            {
+                for (int i = 0; i < output.Length; i++)
+                {
+                    output[i] = 1.0f / (1.0f + Mathf.Exp(-1.0f * output[i]));
+                }
+            }
 
             return output;
         }
@@ -90,7 +97,26 @@ namespace DNNElements
     public enum ActivationFunction
     {
         RELU,
-        SOFTMAX
+        SOFTMAX,
+        SIGMOID
+    }
+
+    public static class ActivationFunctionExtensions
+    {
+        public static float Derivative(this ActivationFunction func, float input)
+        {
+            switch (func)
+            {
+                case ActivationFunction.RELU:
+                    return 0.0f;
+                case ActivationFunction.SOFTMAX:
+                    return 0.0f;
+                case ActivationFunction.SIGMOID:
+                    return input * (1 - input);
+                default:
+                    return 0.0f;
+            }
+        }
     }
 
 }

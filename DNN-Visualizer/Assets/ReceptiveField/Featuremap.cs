@@ -27,7 +27,7 @@ namespace ReceptiveFields
         Vector2Int tile;
         #endregion
 
-        private void Awake()
+        private void Start()
         {
             /* Generate a texture */
             rect = GetComponent<RectTransform>();

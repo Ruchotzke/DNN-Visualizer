@@ -41,6 +41,8 @@ namespace ReceptiveFields
             {
                 Featuremap fmap = Instantiate(pf_Featuremap, FeaturemapContainer);
                 fmap.model = this;
+                fmap.NumElements = layer.Size;
+                fmap.GetComponent<RectTransform>().sizeDelta = new Vector2(20 * layer.Size.x, 20 * layer.Size.y);
                 featuremaps.Add(fmap);
             }
         }
@@ -83,8 +85,16 @@ namespace ReceptiveFields
 
                 for (int i = layerIndex - 1; i >= 0; i--)
                 {
-                    featuremaps[i].SetElementColor(Color.red, element.x, element.y);
-                    SetElements.Add((featuremaps[i], element));
+                    for (int y = -layers[i].Kernel.y / 2; y <= layers[i].Kernel.y / 2; y++)
+                    {
+                        for (int x = -layers[i].Kernel.x / 2; x <= layers[i].Kernel.x / 2; x++)
+                        {
+                            Vector2Int loc = new Vector2Int(x + element.x, y + element.y);
+                            if (loc.x < 0 || loc.y < 0 || loc.x >= layers[i].Size.x || loc.y >= layers[i].Size.y) continue;
+                            featuremaps[i].SetElementColor(Color.red, loc.x, loc.y);
+                            SetElements.Add((featuremaps[i], loc));
+                        }
+                    }
                 }
                 
             }

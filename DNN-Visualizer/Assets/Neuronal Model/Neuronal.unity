@@ -839,6 +839,7 @@ MonoBehaviour:
   input_state: 0
   mark_state: 0
   pf_Neuron: {fileID: 4879724416534252266, guid: b21165fbb08f3794f8a5cc3224b82de4, type: 3}
+  ConnectionMaterial: {fileID: 2100000, guid: 6d993969b3aa9a64c962c0a7c7948a77, type: 2}
   NeuronContainer: {fileID: 980132830}
   Model: {fileID: 1026243126}
 --- !u!4 &706066598

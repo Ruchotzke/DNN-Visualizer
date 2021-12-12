@@ -10,11 +10,21 @@ namespace neuronal
         [Header("Input State")]
         public INPUT_STATE input_state;
         public MARK_STATE mark_state;
+
+        bool IsDragging = false;
+
+        Neuron connectionSource = null;
+        LineRenderer connectionLine = null;
         #endregion
 
         #region PREFABS
         [Header("Prefabs")]
         public Neuron pf_Neuron;
+        #endregion
+
+        #region MATERIALS
+        [Header("Materials")]
+        public Material ConnectionMaterial;
         #endregion
 
         #region CONTAINERS
@@ -71,6 +81,24 @@ namespace neuronal
                         }
                         break;
                     case INPUT_STATE.CONNECT_NEURON:
+                        if (hitinfo.collider != null)
+                        {
+                            Neuron clicked = hitinfo.collider.gameObject.GetComponent<Neuron>();
+                            if (clicked != null)
+                            {
+                                /* Start the drag */
+                                IsDragging = true;
+                                connectionSource = clicked;
+
+                                /* Generate a connection line */
+                                connectionLine = new GameObject("line connector").AddComponent<LineRenderer>();
+                                connectionLine.transform.SetParent(connectionSource.transform);
+                                connectionLine.positionCount = 2;
+                                connectionLine.widthMultiplier = 0.1f;
+                                connectionLine.material = ConnectionMaterial;
+                                connectionLine.SetPositions(new Vector3[] { connectionSource.transform.position, connectionSource.transform.position });
+                            }
+                        }
                         break;
                     case INPUT_STATE.REMOVE_CONNECTIONS:
                         break;
@@ -83,12 +111,48 @@ namespace neuronal
 
             if (Input.GetMouseButton(0))
             {
-
+                switch (input_state)
+                {
+                    case INPUT_STATE.CONNECT_NEURON:
+                        if (IsDragging)
+                        {
+                            connectionLine.SetPosition(1, mousePosition);
+                        }
+                        break;
+                    default:
+                        break;
+                }
             }
 
             if (Input.GetMouseButtonUp(0))
             {
+                switch (input_state)
+                {
+                    case INPUT_STATE.CONNECT_NEURON:
+                        bool success = false;
+                        if (hitinfo.collider != null)
+                        {
+                            Neuron clicked = hitinfo.collider.gameObject.GetComponent<Neuron>();
+                            if (clicked != null && !clicked.Incoming.Contains(connectionSource) && clicked != connectionSource)
+                            {
+                                /* Connect the two neurons if they haven't already been connected */
+                                success = true;
+                                connectionSource.Outgoing.Add(clicked);
+                                clicked.Incoming.Add(connectionSource);
+                                clicked.Weights.Add(Random.Range(-1f, 1f));
+                                connectionLine.SetPosition(1, clicked.transform.position);
+                            }
+                        }
 
+                        /* Reset the drag */
+                        IsDragging = false;
+                        connectionSource = null;
+                        if (!success) Destroy(connectionLine.gameObject);
+                        connectionLine = null;
+                        break;
+                    default:
+                        break;
+                }
             }
         }
         #endregion

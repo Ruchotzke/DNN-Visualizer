@@ -37,6 +37,13 @@ namespace neuronal
         public NeuronModel Model;
         #endregion
 
+        #region INPUTS AND OUTPUTS
+        [Header("Inputs and Outputs")]
+        public Color HiddenColor;
+        public Color InputColor;
+        public Color OutputColor;
+        #endregion
+
         private void Update()
         {
             HandleClicks();
@@ -74,6 +81,23 @@ namespace neuronal
                             Neuron clicked = hitinfo.collider.gameObject.GetComponent<Neuron>();
                             if(clicked != null)
                             {
+                                /* Remove the corresponding outputs from its ancestors */
+                                foreach(var neuron in clicked.Incoming)
+                                {
+                                    neuron.Outgoing.Remove(clicked);
+                                    Transform lr = neuron.transform.Find("LINE: " + clicked.name);
+                                    if(lr != null) Destroy(lr.gameObject);
+                                }
+
+                                /* Remove this neuron and it's weight from descendents */
+                                foreach(var neuron in clicked.Outgoing)
+                                {
+                                    int index = neuron.Incoming.IndexOf(clicked);
+                                    neuron.Incoming.RemoveAt(index);
+                                    neuron.Weights.RemoveAt(index);
+                                }
+
+                                /* Finally, remove the neuron */
                                 Model.neuronList.Remove(clicked);
                                 Model.inputNeurons.Remove(clicked);
                                 Destroy(clicked.gameObject);
@@ -103,6 +127,32 @@ namespace neuronal
                     case INPUT_STATE.REMOVE_CONNECTIONS:
                         break;
                     case INPUT_STATE.MARK_NEURON:
+                        if (hitinfo.collider != null)
+                        {
+                            Neuron clicked = hitinfo.collider.gameObject.GetComponent<Neuron>();
+                            if (clicked != null)
+                            {
+                                /* Alter the state of this neuron. */
+                                if (clicked.IsInputNeuron)
+                                {
+                                    clicked.IsInputNeuron = false;
+                                    clicked.IsOutputNeuron = true;
+                                    clicked.Center.color = OutputColor;
+                                }
+                                else if (clicked.IsOutputNeuron)
+                                {
+                                    clicked.IsOutputNeuron = false;
+                                    clicked.IsInputNeuron = false;
+                                    clicked.Center.color = HiddenColor;
+                                }
+                                else
+                                {
+                                    clicked.IsInputNeuron = true;
+                                    clicked.IsOutputNeuron = false;
+                                    clicked.Center.color = InputColor;
+                                }
+                            }
+                        }
                         break;
                     default:
                         break;
@@ -137,17 +187,18 @@ namespace neuronal
                             {
                                 /* Connect the two neurons if they haven't already been connected */
                                 success = true;
-                                connectionSource.Outgoing.Add(clicked);
+                                connectionSource?.Outgoing.Add(clicked);
                                 clicked.Incoming.Add(connectionSource);
                                 clicked.Weights.Add(Random.Range(-1f, 1f));
                                 connectionLine.SetPosition(1, clicked.transform.position);
+                                connectionLine.name = "LINE: " + clicked.name;
                             }
                         }
 
                         /* Reset the drag */
                         IsDragging = false;
                         connectionSource = null;
-                        if (!success) Destroy(connectionLine.gameObject);
+                        if (!success && connectionLine != null) Destroy(connectionLine.gameObject);
                         connectionLine = null;
                         break;
                     default:

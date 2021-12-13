@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using DNN_V2;
+using UnityEngine.UI;
 
 namespace neuronal
 {
@@ -19,6 +20,8 @@ namespace neuronal
         /* State */
         public float Output;
         public int StepCount = 0;
+
+        public SpriteRenderer Center;
 
         public bool AttemptInference()
         {

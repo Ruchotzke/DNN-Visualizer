@@ -55,6 +55,7 @@ MonoBehaviour:
   IsOutputNeuron: 0
   Output: 0
   StepCount: 0
+  Center: {fileID: 7580547809451169297}
 --- !u!58 &5168485195573085974
 CircleCollider2D:
   m_ObjectHideFlags: 0

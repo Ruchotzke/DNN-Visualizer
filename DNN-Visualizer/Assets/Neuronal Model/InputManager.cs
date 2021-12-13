@@ -20,6 +20,7 @@ namespace neuronal
         #region PREFABS
         [Header("Prefabs")]
         public Neuron pf_Neuron;
+        public Label pf_Label;
         #endregion
 
         #region MATERIALS
@@ -42,6 +43,11 @@ namespace neuronal
         public Color HiddenColor;
         public Color InputColor;
         public Color OutputColor;
+
+        public Color WeightLabelColor;
+        public Color ActivationLabelColor;
+        public Color InputLabelColor;
+        public Color OutputLabelColor;
         #endregion
 
         private void Update()
@@ -57,7 +63,10 @@ namespace neuronal
             RaycastHit2D hitinfo = Physics2D.Raycast(mousePosition, Vector2.zero);
 
             /* If we are over a UI component, ignore any mouse actions */
-            if (UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject()) return;
+            if (UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject())
+            {
+                return;
+            }
 
             /* Handle the mouse actions */
             if (Input.GetMouseButtonDown(0))
@@ -72,6 +81,7 @@ namespace neuronal
                             var neuron = Instantiate(pf_Neuron, NeuronContainer);
                             neuron.name = "Neuron " + Model.neuronList.Count;
                             Model.neuronList.Add(neuron);
+                            neuron.Name.text = neuron.name.Substring(neuron.name.IndexOf(' ') + 1);
                             neuron.transform.position = mousePosition;
                         }
                         break;
@@ -110,6 +120,9 @@ namespace neuronal
                             Neuron clicked = hitinfo.collider.gameObject.GetComponent<Neuron>();
                             if (clicked != null)
                             {
+                                /* Clean up any loose drags */
+                                if(connectionLine != null) Destroy(connectionLine.gameObject);
+
                                 /* Start the drag */
                                 IsDragging = true;
                                 connectionSource = clicked;
@@ -132,21 +145,34 @@ namespace neuronal
                             Neuron clicked = hitinfo.collider.gameObject.GetComponent<Neuron>();
                             if (clicked != null)
                             {
+                                Label label = clicked.transform.Find("Label")?.GetComponent<Label>();
+                                if (label == null)
+                                {
+                                    label = Instantiate(pf_Label, clicked.transform);
+                                    label.name = "Label";
+                                    label.gameObject.SetActive(false);
+                                }
+
                                 /* Alter the state of this neuron. */
                                 if (clicked.IsInputNeuron)
                                 {
+                                    label.transform.position = new Vector3(clicked.transform.position.x + clicked.transform.localScale.x, clicked.transform.position.y, clicked.transform.position.z);
+                                    label.gameObject.SetActive(true);
                                     clicked.IsInputNeuron = false;
                                     clicked.IsOutputNeuron = true;
                                     clicked.Center.color = OutputColor;
                                 }
                                 else if (clicked.IsOutputNeuron)
                                 {
+                                    label.gameObject.SetActive(false);
                                     clicked.IsOutputNeuron = false;
                                     clicked.IsInputNeuron = false;
                                     clicked.Center.color = HiddenColor;
                                 }
                                 else
                                 {
+                                    label.transform.position = new Vector3(clicked.transform.position.x - clicked.transform.localScale.x, clicked.transform.position.y, clicked.transform.position.z);
+                                    label.gameObject.SetActive(true);
                                     clicked.IsInputNeuron = true;
                                     clicked.IsOutputNeuron = false;
                                     clicked.Center.color = InputColor;
@@ -207,26 +233,39 @@ namespace neuronal
                 {
                     case INPUT_STATE.CONNECT_NEURON:
                         bool success = false;
-                        if (hitinfo.collider != null)
+                        if (IsDragging)
                         {
-                            Neuron clicked = hitinfo.collider.gameObject.GetComponent<Neuron>();
-                            if (clicked != null && !clicked.Incoming.Contains(connectionSource) && clicked != connectionSource)
+                            if (hitinfo.collider != null)
                             {
-                                /* Connect the two neurons if they haven't already been connected */
-                                success = true;
-                                connectionSource?.Outgoing.Add(clicked);
-                                clicked.Incoming.Add(connectionSource);
-                                clicked.Weights.Add(Random.Range(-1f, 1f));
-                                connectionLine.SetPosition(1, clicked.transform.position);
-                                connectionLine.name = "LINE: " + clicked.name;
+                                Neuron clicked = hitinfo.collider.gameObject.GetComponent<Neuron>();
+                                if (clicked != null && !clicked.Incoming.Contains(connectionSource) && clicked != connectionSource)
+                                {
+                                    /* Connect the two neurons if they haven't already been connected */
+                                    success = true;
+                                    connectionSource.Outgoing.Add(clicked);
+                                    clicked.Incoming.Add(connectionSource);
+                                    clicked.Weights.Add(Random.Range(-1f, 1f));
+                                    connectionLine.SetPosition(1, clicked.transform.position);
+                                    connectionLine.name = "LINE: " + clicked.name;
+
+                                    /* If we were successful, add a weight label */
+                                    var label = Instantiate(pf_Label, connectionSource.transform);
+                                    label.name = "Weight Label: " + clicked.name;
+                                    label.transform.position = Vector3.Lerp(connectionSource.transform.position, clicked.transform.position, 0.3f);
+                                    label.SetText(clicked.Weights[clicked.Incoming.IndexOf(connectionSource)], WeightLabelColor);
+                                }
                             }
+
+                            
                         }
 
                         /* Reset the drag */
                         IsDragging = false;
+                        if (!success && connectionLine != null)
+                            Destroy(connectionLine.gameObject);
                         connectionSource = null;
-                        if (!success && connectionLine != null) Destroy(connectionLine.gameObject);
                         connectionLine = null;
+
                         break;
                     case INPUT_STATE.MOVE_NEURON:
                         if (IsDragging)

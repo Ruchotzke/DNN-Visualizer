@@ -972,12 +972,17 @@ MonoBehaviour:
   input_state: 0
   mark_state: 0
   pf_Neuron: {fileID: 4879724416534252266, guid: b21165fbb08f3794f8a5cc3224b82de4, type: 3}
+  pf_Label: {fileID: -4895730503836861642, guid: 92bb0941c14987e47a43b15e0a466d80, type: 3}
   ConnectionMaterial: {fileID: 2100000, guid: 6d993969b3aa9a64c962c0a7c7948a77, type: 2}
   NeuronContainer: {fileID: 980132830}
   Model: {fileID: 1026243126}
   HiddenColor: {r: 0.24705882, g: 0.24705882, b: 0.24705882, a: 1}
   InputColor: {r: 0.22745098, g: 0.22745098, b: 0.40392157, a: 1}
   OutputColor: {r: 0.40392157, g: 0.24183454, b: 0.22745098, a: 1}
+  WeightLabelColor: {r: 0.372686, g: 0.6320754, b: 0.38320175, a: 1}
+  ActivationLabelColor: {r: 0.43952474, g: 0.76605624, b: 0.7830189, a: 1}
+  InputLabelColor: {r: 0.37112856, g: 0.37112856, b: 0.5660378, a: 1}
+  OutputLabelColor: {r: 0.6037736, g: 0.43510938, b: 0.41865435, a: 1}
 --- !u!4 &706066598
 Transform:
   m_ObjectHideFlags: 0

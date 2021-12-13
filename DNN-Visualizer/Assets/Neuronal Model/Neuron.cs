@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using UnityEngine;
 using DNN_V2;
 using UnityEngine.UI;
+using TMPro;
 
 namespace neuronal
 {
     public class Neuron : MonoBehaviour
     {
         /* Properties */
+        [Header("Properties")]
         public List<Neuron> Incoming = new List<Neuron>();
         public List<float> Weights = new List<float>();
         public List<Neuron> Outgoing = new List<Neuron>();
@@ -21,7 +23,9 @@ namespace neuronal
         public float Output;
         public int StepCount = 0;
 
+        [Header("Graphics")]
         public SpriteRenderer Center;
+        public TextMeshProUGUI Name;
 
         public bool AttemptInference()
         {

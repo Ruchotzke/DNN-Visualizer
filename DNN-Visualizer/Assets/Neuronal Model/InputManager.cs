@@ -154,6 +154,18 @@ namespace neuronal
                             }
                         }
                         break;
+                    case INPUT_STATE.MOVE_NEURON:
+                        if (hitinfo.collider != null)
+                        {
+                            Neuron clicked = hitinfo.collider.gameObject.GetComponent<Neuron>();
+                            if (clicked != null)
+                            {
+                                /* Start the drag */
+                                IsDragging = true;
+                                connectionSource = clicked;
+                            }
+                        }
+                        break;
                     default:
                         break;
                 }
@@ -168,6 +180,21 @@ namespace neuronal
                         {
                             connectionLine.SetPosition(1, mousePosition);
                         }
+                        break;
+                    case INPUT_STATE.MOVE_NEURON:
+                        if (IsDragging)
+                        {
+                            connectionSource.transform.position = mousePosition;
+                            foreach (var neuron in connectionSource.Incoming)
+                            {
+                                neuron.transform.Find("LINE: " + connectionSource.name).GetComponent<LineRenderer>().SetPosition(1, connectionSource.transform.position);
+                            }
+                            foreach (var lr in connectionSource.transform.GetComponentsInChildren<LineRenderer>())
+                            {
+                                lr.SetPosition(0, connectionSource.transform.position);
+                            }
+                        }
+                        
                         break;
                     default:
                         break;
@@ -201,6 +228,23 @@ namespace neuronal
                         if (!success && connectionLine != null) Destroy(connectionLine.gameObject);
                         connectionLine = null;
                         break;
+                    case INPUT_STATE.MOVE_NEURON:
+                        if (IsDragging)
+                        {
+                            connectionSource.transform.position = mousePosition;
+                            foreach (var neuron in connectionSource.Incoming)
+                            {
+                                neuron.transform.Find("LINE: " + connectionSource.name).GetComponent<LineRenderer>().SetPosition(1, connectionSource.transform.position);
+                            }
+                            foreach (var lr in connectionSource.transform.GetComponentsInChildren<LineRenderer>())
+                            {
+                                lr.SetPosition(0, connectionSource.transform.position);
+                            }
+                        }
+
+                        /* Reset the drag */
+                        IsDragging = false;
+                        break;
                     default:
                         break;
                 }
@@ -211,7 +255,14 @@ namespace neuronal
         #region BUTTON EVENTS
         public void OnInputModeChange(int nextState)
         {
-            input_state = (INPUT_STATE)nextState;
+            if (nextState == (int)input_state)
+            {
+                input_state = INPUT_STATE.NONE;
+            }
+            else
+            {
+                input_state = (INPUT_STATE)nextState;
+            }
         }
         #endregion
     }
@@ -223,7 +274,8 @@ namespace neuronal
         REMOVE_NEURON,
         CONNECT_NEURON,
         REMOVE_CONNECTIONS,
-        MARK_NEURON
+        MARK_NEURON,
+        MOVE_NEURON
     }
 
     public enum MARK_STATE

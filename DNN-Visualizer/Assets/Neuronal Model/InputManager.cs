@@ -50,6 +50,9 @@ namespace neuronal
         public Color OutputLabelColor;
         #endregion
 
+        Neuron firstAddition = null;
+        AdditionDataset additionDataset = null;
+
         private void Update()
         {
             HandleClicks();
@@ -83,6 +86,16 @@ namespace neuronal
                             Model.neuronList.Add(neuron);
                             neuron.Name.text = neuron.name.Substring(neuron.name.IndexOf(' ') + 1);
                             neuron.transform.position = mousePosition;
+
+                            /* Make sure the neuron has the same "step" as the other neurons */
+                            if(firstAddition != null)
+                            {
+                                neuron.InferenceStepCount = firstAddition.InferenceStepCount;
+                            }
+                            else
+                            {
+                                firstAddition = neuron;
+                            }
                         }
                         break;
                     case INPUT_STATE.REMOVE_NEURON:
@@ -145,12 +158,13 @@ namespace neuronal
                             Neuron clicked = hitinfo.collider.gameObject.GetComponent<Neuron>();
                             if (clicked != null)
                             {
-                                Label label = clicked.transform.Find("Label")?.GetComponent<Label>();
+                                Label label = clicked.activationLabel;
                                 if (label == null)
                                 {
                                     label = Instantiate(pf_Label, clicked.transform);
                                     label.name = "Label";
                                     label.gameObject.SetActive(false);
+                                    clicked.activationLabel = label;
                                 }
 
                                 /* Alter the state of this neuron. */
@@ -161,6 +175,17 @@ namespace neuronal
                                     clicked.IsInputNeuron = false;
                                     clicked.IsOutputNeuron = true;
                                     clicked.Center.color = OutputColor;
+                                    Model.inputNeurons.Remove(clicked);
+                                    Model.outputNeurons.Add(clicked);
+
+                                    /* sort the neurons */
+                                    Model.outputNeurons.Sort((a, b) =>
+                                    {
+                                        return (a.transform.position.y >= b.transform.position.y) ? -1 : 1;
+                                    });
+
+                                    /* Output neurons have no activation here */
+                                    clicked.Activation = DNN_V2.ActivationFunction.LINEAR;
                                 }
                                 else if (clicked.IsOutputNeuron)
                                 {
@@ -168,6 +193,10 @@ namespace neuronal
                                     clicked.IsOutputNeuron = false;
                                     clicked.IsInputNeuron = false;
                                     clicked.Center.color = HiddenColor;
+                                    Model.outputNeurons.Remove(clicked);
+
+                                    /* hidden/input neurons have sigmoid activation */
+                                    clicked.Activation = DNN_V2.ActivationFunction.SIGMOID;
                                 }
                                 else
                                 {
@@ -176,6 +205,13 @@ namespace neuronal
                                     clicked.IsInputNeuron = true;
                                     clicked.IsOutputNeuron = false;
                                     clicked.Center.color = InputColor;
+                                    Model.inputNeurons.Add(clicked);
+
+                                    /* sort the neurons */
+                                    Model.inputNeurons.Sort((a, b) =>
+                                    {
+                                        return (a.transform.position.y >= b.transform.position.y) ? -1 : 1;
+                                    });
                                 }
                             }
                         }
@@ -301,6 +337,64 @@ namespace neuronal
             else
             {
                 input_state = (INPUT_STATE)nextState;
+            }
+        }
+
+        public void OnInferencePress()
+        {
+            /* First make sure the editing is off */
+            input_state = INPUT_STATE.NONE;
+
+            /* Also make sure we have a dataset */
+            if (additionDataset == null) additionDataset = new AdditionDataset(new Vector2(-1.0f, 1.0f), 100);
+
+            /* Select and input and pass it into the input nodes */
+            var datapoint = additionDataset.dataset[Random.Range(0, additionDataset.dataset.Count)];
+            Model.lastInput = datapoint.inputs;
+            Model.lastOutput = new float[] { datapoint.output };
+
+            /* Perform an inference */
+            Model.DoInference(datapoint.inputs);
+        }
+
+        public void OnBackpropagationPress()
+        {
+            /* First make sure the editing is off */
+            input_state = INPUT_STATE.NONE;
+
+            /* Tell the system to perform a single backprop */
+            Model.DoBackpropagation(Model.lastOutput);
+        }
+
+        public void OnTrainEpochs(int numEpochs)
+        {
+            for(int epoch = 0; epoch < numEpochs; epoch++)
+            {
+                /* For each epoch do one inference and backprop per dataset */
+                for(int sample = 0; sample < 100; sample++)
+                {
+                    /* Inference */
+                    var datapoint = additionDataset.dataset[sample];
+                    Model.lastInput = datapoint.inputs;
+                    Model.lastOutput = new float[] { datapoint.output };
+                    Model.DoInference(datapoint.inputs);
+
+                    /* Backprop */
+                    Model.DoBackpropagation(Model.lastOutput);
+                }
+
+                /* After an epoch, calculate loss */
+                List<float> outputs = new List<float>();
+                List<float> correct = new List<float>();
+                for(int i = 0; i < 100; i++)
+                {
+                    var datapoint = additionDataset.dataset[i];
+                    Model.DoInference(datapoint.inputs);
+                    outputs.Add(Model.outputNeurons[0].Output);
+                    correct.Add(datapoint.output);
+                }
+                float loss = Error.MSE(outputs, correct);
+                Debug.Log("Epoch: " + epoch + " Loss: " + loss);
             }
         }
         #endregion

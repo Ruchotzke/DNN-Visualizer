@@ -116,7 +116,7 @@ namespace DNN_V2
             float[] outputError = new float[output.Length];
             for (int i = 0; i < output.Length; i++)
             {
-                outputError[i] = layers[layers.Count - 1].Neurons[i].activationFunction.Derivative(layers[layers.Count - 1].Neurons[0].Output) * CrossEntropyLossDerivative(output[i], actual[i]);
+                outputError[i] = layers[layers.Count - 1].Neurons[i].activationFunction.Derivative(layers[layers.Count - 1].Neurons[i].Output) * CrossEntropyLossDerivative(output[i], actual[i]);
                 layers[layers.Count - 1].Neurons[i].UpdateParameters(outputError[i], learningRate);
             }
             

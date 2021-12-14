@@ -12,7 +12,8 @@ namespace DNN_V2
     {
         SIGMOID,
         RELU,
-        SOFTMAX
+        SOFTMAX,
+        LINEAR
     }
 
     public static class ActivationFunctionExtensions
@@ -31,6 +32,8 @@ namespace DNN_V2
                     return 1.0f / (1.0f + Mathf.Exp(-value));
                 case ActivationFunction.RELU:
                     return Mathf.Max(0.0f, value);
+                case ActivationFunction.LINEAR:
+                    return value;
                 case ActivationFunction.SOFTMAX:
                     Debug.LogError("CANT EVALUATE SOFTMAX ON A SINGLE OUTPUT");
                     return float.NaN; 
@@ -72,6 +75,8 @@ namespace DNN_V2
             {
                 case ActivationFunction.SIGMOID:
                     return value * (1.0f - value);
+                case ActivationFunction.LINEAR:
+                    return 1.0f;
                 default:
                     return 0.0f;
             }

@@ -14,6 +14,11 @@ namespace neuronal
             Text.text = value.ToString("f2");
             Text.color = color;
         }
+
+        public void SetText(float value)
+        {
+            Text.text = value.ToString("f2");
+        }
     }
 }
 

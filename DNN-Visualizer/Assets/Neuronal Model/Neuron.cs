@@ -20,12 +20,22 @@ namespace neuronal
         public bool IsOutputNeuron;
 
         /* State */
-        public float Output;
-        public int StepCount = 0;
+        public float Output
+        {
+            get { return _output; }
+            set { _output = value;
+                activationLabel?.SetText(value); 
+                }
+        }
+        private float _output;
+        public float Error;
+        public int InferenceStepCount = 0;
+        public int BackpropStepCount = 0;
 
         [Header("Graphics")]
         public SpriteRenderer Center;
         public TextMeshProUGUI Name;
+        public Label activationLabel;
 
         public bool AttemptInference()
         {
@@ -35,7 +45,7 @@ namespace neuronal
             /* We only want to do an inference if all of our ancestors are done */
             foreach(var neuron in Incoming)
             {
-                if (neuron.StepCount <= this.StepCount) return false; //one of our ancestors hasn't yet fired.
+                if (neuron.InferenceStepCount <= this.InferenceStepCount) return false; //one of our ancestors hasn't yet fired.
             }
 
             /* We are ready to perform inference */
@@ -48,8 +58,46 @@ namespace neuronal
 
             /* We completed our inference. Update our state */
             Output = accumulation;
-            StepCount++;
+            InferenceStepCount++;
             return true;
+        }
+    
+        public bool AttemptBackpropagation()
+        {
+            /* If all of our descendants have a valid error, we can update our own error */
+            foreach(var neuron in Outgoing)
+            {
+                if (neuron.BackpropStepCount <= this.BackpropStepCount) return false;  //someone downstream isn't done
+            }
+
+            /* Everyone downstream is done. We can update our values and error now */
+            Error = 0.0f;
+            foreach(var descendant in Outgoing)
+            {
+                Error += descendant.Weights[descendant.Incoming.IndexOf(this)] * descendant.Error;
+            }
+            Error *= Activation.Derivative(Output);
+
+            /* We did it. let the parent script know */
+            BackpropStepCount++;
+            return true;
+        }
+
+        /// <summary>
+        /// Update the weights and biases of this neuron according to 
+        /// this neuron's error.
+        /// </summary>
+        /// <param name="learningRate">How fast should error alter weights and biases.</param>
+        public void UpdateParams(float learningRate)
+        {
+            /* Weights are adjusted by their derivative (their activation) */
+            for(int i = 0; i < Weights.Count; i++)
+            {
+                Weights[i] -= Incoming[i].Output * Error * learningRate;
+            }
+
+            /* Biases are constant, and their only variant is the error itself */
+            Bias -= Error * learningRate;
         }
     }
 }

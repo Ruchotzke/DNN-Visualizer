@@ -3,9 +3,13 @@
 ### Ethan Ruchotzke, Fall 2021
 
 ![Construct a Network](https://github.com/Ruchotzke/DNN-Visualizer/blob/main/Images/construct_network.gif)
+Constructing a network.
+
 ![Both propagations](https://github.com/Ruchotzke/DNN-Visualizer/blob/main/Images/propagation.gif)
+Propagating values through the network.
 
 ![Training](https://github.com/Ruchotzke/DNN-Visualizer/blob/main/Images/training.gif)
+Training the network.
 
 ## Description
 The Deep Learning Visualizer is a simple Unity application intended to teach individuals about neural networks. Specifically, this application is intended to help users gain intuition of the backpropagation algorithm, and how repeated backpropagation is used to train a model.

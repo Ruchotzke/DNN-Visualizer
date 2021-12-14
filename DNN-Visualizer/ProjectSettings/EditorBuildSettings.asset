@@ -6,6 +6,6 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/DataGathering/DataGathering.unity
-    guid: d899a1024922ff740aa11cebbd3394ed
+    path: Assets/Neuronal Model/Neuronal.unity
+    guid: 19172721999efc649930babb2de72eb6
   m_configObjects: {}

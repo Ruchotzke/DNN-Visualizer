@@ -367,7 +367,10 @@ namespace neuronal
             input_state = INPUT_STATE.NONE;
 
             /* Tell the system to perform a single backprop */
-            Model.DoBackpropagation(Model.lastOutput);
+            var actions = Model.DoBackpropagation(Model.lastOutput);
+
+            /* Display the backprop slowly */
+            ActionDisplayManager.Instance.DisplayBackpropagation(actions);
         }
 
         public void OnTrainEpochs(int numEpochs)

@@ -98,15 +98,20 @@ namespace neuronal
             return actions;
         }
 
-        public void DoBackpropagation(float[] expectedOutputs)
+        public List<ModelAction> DoBackpropagation(float[] expectedOutputs, int initialTimestamp = 0)
         {
+            /* Actions */
+            List<ModelAction> actions = new List<ModelAction>();
+
             /* First set up the output neuron errors */
             /* We will use MSE for our model */
+            int timestamp = initialTimestamp;
             for(int i = 0; i < expectedOutputs.Length; i++)
             {
                 /* An output neuron's error is the loss derivative multiplied by the derivative of the output activation function */
                 outputNeurons[i].Error = outputNeurons[i].Activation.Derivative(outputNeurons[i].Output) * Error.MSEDerivative(outputNeurons[i].Output, expectedOutputs[i]);
                 outputNeurons[i].BackpropStepCount += 1; /* These nodes are complete */
+                actions.Add(new ModelAction(ModelActionType.CALCULATED_ERROR, outputNeurons[i], null, timestamp));
             }
 
             /* We can now perform backprop on the remaining neurons iteratively */
@@ -117,12 +122,19 @@ namespace neuronal
             incomplete.RemoveAll(neuron => neuron.IsOutputNeuron); //output neurons are done. Input neurons are already absent from this list as well.
             while (attemptCount < MAX_ITERATIONS && incomplete.Count > 0)
             {
+                /* Timestamp */
+                timestamp += 1;
+
                 /* Attempt to do an error calculation on each neuron. */
                 List<Neuron> completed = new List<Neuron>();
                 foreach (var neuron in incomplete)
                 {
                     bool didError = neuron.AttemptBackpropagation();
-                    if (didError) completed.Add(neuron);
+                    if (didError)
+                    {
+                        completed.Add(neuron);
+                        actions.Add(new ModelAction(ModelActionType.CALCULATED_ERROR, neuron, null, timestamp));
+                    }
                 }
 
                 /* Remove completed neurons from the pool */
@@ -134,18 +146,22 @@ namespace neuronal
                 /* This attempt is complete */
                 attemptCount++;
             }
+            timestamp += 1;
 
             if (attemptCount >= MAX_ITERATIONS) {
                 Debug.LogError("Backpropagation Incomplete. Max iterations reached");
                 Debug.LogError("MISSING NODES: " + string.Join(", ", incomplete));
-                return;
+                return actions;
             }
 
             /* Finally, if backprop worked out, we can update all parameters */
             foreach(var neuron in neuronList)
             {
                 neuron.UpdateParams(LEARNING_RATE);
+                actions.Add(new ModelAction(ModelActionType.UPDATED_PARAMS, neuron, null, timestamp));
             }
+
+            return actions;
         }
     }
 }

@@ -229,6 +229,16 @@ namespace neuronal
                             }
                         }
                         break;
+                    case INPUT_STATE.SHOW_ERROR_PATH:
+                        if (hitinfo.collider != null)
+                        {
+                            Neuron clicked = hitinfo.collider.gameObject.GetComponent<Neuron>();
+                            if (clicked != null)
+                            {
+                                ActionDisplayManager.Instance.DisplayErrorPath(clicked.GetErrorPath());
+                            }
+                        }
+                        break;
                     default:
                         break;
                 }
@@ -415,7 +425,8 @@ namespace neuronal
         CONNECT_NEURON,
         REMOVE_CONNECTIONS,
         MARK_NEURON,
-        MOVE_NEURON
+        MOVE_NEURON,
+        SHOW_ERROR_PATH
     }
 
     public enum MARK_STATE

@@ -100,6 +100,41 @@ namespace neuronal
             /* Biases are constant, and their only variant is the error itself */
             Bias -= Error * learningRate;
         }
+
+        public List<(int distance, Neuron neuron)> GetErrorPath()
+        {
+            /* Just get all neurons between this neuron and the end nodes */
+            List<(int d, Neuron n)> path = new List<(int d, Neuron n)>();
+
+            Queue<(int d, Neuron n)> pathQueue = new Queue<(int,Neuron)>();
+            pathQueue.Enqueue((0, this));
+
+            while(pathQueue.Count > 0)
+            {
+                var neuron = pathQueue.Dequeue();
+
+                path.Add((neuron.d, neuron.n));
+
+                foreach(var output in neuron.n.Outgoing)
+                {
+                    bool contains = false;
+                    foreach (var item in pathQueue)
+                    {
+                        if (item.n == output)
+                        {
+                            contains = true;
+                            break;
+                        }
+                    }
+                    if (!contains)
+                    {
+                        pathQueue.Enqueue((neuron.d + 1, output));
+                    }
+                }
+            }
+
+            return path;
+        }
     }
 }
 

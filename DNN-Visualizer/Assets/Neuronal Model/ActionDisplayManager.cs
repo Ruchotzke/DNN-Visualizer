@@ -88,6 +88,42 @@ namespace neuronal
             }
         }
 
+        public void DisplayErrorPath(List<(int distance, Neuron neuron)> path)
+        {
+            /* Break into arrays of neurons by distance */
+            int maxDistance = 0;
+            foreach(var item in path)
+            {
+                maxDistance = Mathf.Max(maxDistance, item.distance);
+            }
+
+            List<List<Neuron>> pathByDistance = new List<List<Neuron>>();
+            for(int i = 0; i <= maxDistance; i++)
+            {
+                pathByDistance.Add(new List<Neuron>());
+            }
+
+            foreach(var item in path)
+            {
+                pathByDistance[item.distance].Add(item.neuron);
+            }
+
+            for(int i = 0; i < 4; i++)
+            {
+                for (int level = 1; level < pathByDistance.Count; level++)
+                {
+                    foreach (var neuron in pathByDistance[level])
+                    {
+                        foreach (var pred in pathByDistance[level - 1])
+                        {
+                            StartCoroutine(DisplayArrow(neuron.transform.position, pred.transform.position, LayerTime * (level - 1) + i, 2.0f, 5.0f));
+                        }
+                    }
+                }
+            }
+            
+        }
+
         IEnumerator LightNeuron(Neuron n, float delay, float time, Color color)
         {
             yield return new WaitForSeconds(delay);

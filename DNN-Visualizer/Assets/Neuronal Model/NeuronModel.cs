@@ -23,6 +23,12 @@ namespace neuronal
         public float[] lastInput;       /* last input used in the system */
         public float[] lastOutput;      /* corresponding correct output for last input */
 
+        InputManager manager;
+        private void Awake()
+        {
+            manager = GameObject.FindObjectOfType<InputManager>();
+        }
+
         public List<ModelAction> DoInference(float[] inputs, int initialTimestamp = 0)
         {
             /* Generate a list of actions to return */
@@ -155,13 +161,39 @@ namespace neuronal
             }
 
             /* Finally, if backprop worked out, we can update all parameters */
-            foreach(var neuron in neuronList)
+            foreach (var neuron in neuronList)
             {
                 neuron.UpdateParams(LEARNING_RATE);
                 actions.Add(new ModelAction(ModelActionType.UPDATED_PARAMS, neuron, null, timestamp));
             }
 
             return actions;
+        }
+
+        public (float loss, float acc) GetStats(bool updateGUI)
+        {
+            /* Get accuracy and loss to update graphs */
+            List<float> outputs = new List<float>();
+            List<float> correct = new List<float>();
+            float numCorrect = 0.0f;
+            for (int i = 0; i < manager.additionDataset.Size; i++)
+            {
+                var datapoint = manager.additionDataset.dataset[i];
+                DoInference(datapoint.inputs);
+                outputs.Add(outputNeurons[0].Output);
+                correct.Add(datapoint.output);
+
+                if (Mathf.Abs(outputNeurons[0].Output - datapoint.output) < 0.1f)
+                {
+                    numCorrect += 1.0f;
+                }
+            }
+            float loss = Error.MSE(outputs, correct);
+            float acc = (numCorrect / manager.additionDataset.Size) * 100.0f;
+            int epoch = GraphManager.Instance.Loss.Count > 0 ? GraphManager.Instance.Loss[GraphManager.Instance.Loss.Count - 1].epoch + 1 : 0;
+            GraphManager.Instance.UpdateLists(epoch, loss, acc, updateGUI);
+
+            return (loss, acc);
         }
     }
 }

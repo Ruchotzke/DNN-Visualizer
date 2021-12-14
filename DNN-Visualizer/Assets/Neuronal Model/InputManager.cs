@@ -51,7 +51,12 @@ namespace neuronal
         #endregion
 
         Neuron firstAddition = null;
-        AdditionDataset additionDataset = null;
+        public AdditionDataset additionDataset = null;
+
+        private void Awake()
+        {
+            additionDataset = new AdditionDataset(new Vector2(-1.5f, 1.5f), 250);
+        }
 
         private void Update()
         {
@@ -379,16 +384,20 @@ namespace neuronal
             /* Tell the system to perform a single backprop */
             var actions = Model.DoBackpropagation(Model.lastOutput);
 
+            /* Update stats */
+            Model.GetStats(true);
+
             /* Display the backprop slowly */
             ActionDisplayManager.Instance.DisplayBackpropagation(actions);
         }
 
         public void OnTrainEpochs(int numEpochs)
         {
+            int startEpoch = GraphManager.Instance.Loss.Count > 0 ? GraphManager.Instance.Loss[GraphManager.Instance.Loss.Count - 1].epoch + 1 : 0;
             for(int epoch = 0; epoch < numEpochs; epoch++)
             {
-                /* For each epoch do one inference and backprop per dataset */
-                for(int sample = 0; sample < 100; sample++)
+                /* For each epoch do one inference and backprop per dataset (stochastic) */
+                for(int sample = 0; sample < additionDataset.Size; sample++)
                 {
                     /* Inference */
                     var datapoint = additionDataset.dataset[sample];
@@ -398,20 +407,30 @@ namespace neuronal
 
                     /* Backprop */
                     Model.DoBackpropagation(Model.lastOutput);
+
+                    
                 }
 
                 /* After an epoch, calculate loss */
                 List<float> outputs = new List<float>();
                 List<float> correct = new List<float>();
-                for(int i = 0; i < 100; i++)
+                float numCorrect = 0.0f;
+                for(int i = 0; i < additionDataset.Size; i++)
                 {
                     var datapoint = additionDataset.dataset[i];
                     Model.DoInference(datapoint.inputs);
                     outputs.Add(Model.outputNeurons[0].Output);
                     correct.Add(datapoint.output);
+
+                    if(Mathf.Abs(Model.outputNeurons[0].Output - datapoint.output) < 0.1f)
+                    {
+                        numCorrect += 1.0f;
+                    }
                 }
                 float loss = Error.MSE(outputs, correct);
-                Debug.Log("Epoch: " + epoch + " Loss: " + loss);
+                float acc = (numCorrect / additionDataset.Size) * 100.0f;
+                GraphManager.Instance.UpdateLists(epoch + startEpoch, loss, acc, epoch == numEpochs - 1);
+                Debug.Log("Epoch: " + epoch + " Loss: " + loss + " Accuracy: " + acc);
             }
         }
         #endregion

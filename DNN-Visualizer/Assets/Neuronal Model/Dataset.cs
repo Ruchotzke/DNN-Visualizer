@@ -12,8 +12,11 @@ namespace neuronal
     {
         public List<(float[] inputs, float output)> dataset = new List<(float[] inputs, float output)> ();
 
+        public int Size;
+
         public AdditionDataset(Vector2 inputRange, int values)
         {
+            this.Size = values;
             for(int i = 0; i < values; i++)
             {
                 float a = Random.Range(inputRange.x, inputRange.y);

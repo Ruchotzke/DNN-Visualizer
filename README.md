@@ -2,7 +2,11 @@
 ### CprE 482x Bounty Points Project
 ### Ethan Ruchotzke, Fall 2021
 
-![A model trained with 10 epochs](https://github.com/Ruchotzke/DNN-Visualizer/blob/main/Images/10-epochs.png)
+![Construct a Network](https://github.com/Ruchotzke/DNN-Visualizer/blob/main/Images/construct_network.gif)
+![Both propagations](https://github.com/Ruchotzke/DNN-Visualizer/blob/main/Images/propagation.gif)
+
+![Training](https://github.com/Ruchotzke/DNN-Visualizer/blob/main/Images/training.gif)
+
 ## Description
 The Deep Learning Visualizer is a simple Unity application intended to teach individuals about neural networks. Specifically, this application is intended to help users gain intuition of the backpropagation algorithm, and how repeated backpropagation is used to train a model.
 ## Build Instructions
@@ -55,6 +59,8 @@ The application is divided into several regions:
 	- Click a neuron to show the path error takes to get from the output to this neuron. 
 	- Useful to illustrate that error is <b> additive </b> across all paths.
 
+![Error path towards neuron 0](https://github.com/Ruchotzke/DNN-Visualizer/blob/main/Images/error-path.png)
+
 ### Right Panel - Training and Results
  - `MSE Per Epoch`
 	- The mean-squared-error of the model across the entire dataset for a given epoch.
@@ -78,3 +84,7 @@ There are many features which I would like to implement for this project which w
 	 - Hover over connections to view weight value / statistics for that weight
 	 - Activation displayed when mousing over a neuron
 
+## More Images
+![Forward Propagation in Progress](https://github.com/Ruchotzke/DNN-Visualizer/blob/main/Images/ongoing-inference.png)
+![Backpropagation in Progress](https://github.com/Ruchotzke/DNN-Visualizer/blob/main/Images/ongoing-backprop.png)
+![Trained Model](https://github.com/Ruchotzke/DNN-Visualizer/blob/main/Images/training.png)

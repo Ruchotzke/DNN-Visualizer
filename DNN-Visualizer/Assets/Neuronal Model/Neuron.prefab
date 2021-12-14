@@ -288,10 +288,13 @@ MonoBehaviour:
   Activation: 0
   IsInputNeuron: 0
   IsOutputNeuron: 0
-  Output: 0
-  StepCount: 0
+  Error: 0
+  InferenceStepCount: 0
+  BackpropStepCount: 0
   Center: {fileID: 7580547809451169297}
+  Edge: {fileID: 7580547810328862885}
   Name: {fileID: 5241237385378749097}
+  activationLabel: {fileID: 0}
 --- !u!58 &5168485195573085974
 CircleCollider2D:
   m_ObjectHideFlags: 0

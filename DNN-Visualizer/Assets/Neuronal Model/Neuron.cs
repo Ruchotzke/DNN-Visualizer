@@ -34,6 +34,7 @@ namespace neuronal
 
         [Header("Graphics")]
         public SpriteRenderer Center;
+        public SpriteRenderer Edge;
         public TextMeshProUGUI Name;
         public Label activationLabel;
 

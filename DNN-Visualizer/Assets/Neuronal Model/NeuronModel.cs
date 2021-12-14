@@ -10,6 +10,7 @@ namespace neuronal
     {
         public const int MAX_ITERATIONS = 1000;
         public const float LEARNING_RATE = 0.01f;
+        public const bool USE_SLOW_INFERENCE = true;
 
         /* NOTE: INPUT/OUTPUT NEURON INDICES ARE SORTED BY Y POSITION (HIGH Y == LOW INDEX) */
         public List<Neuron> inputNeurons = new List<Neuron>();
@@ -22,27 +23,59 @@ namespace neuronal
         public float[] lastInput;       /* last input used in the system */
         public float[] lastOutput;      /* corresponding correct output for last input */
 
-        public void DoInference(float[] inputs)
+        public List<ModelAction> DoInference(float[] inputs, int initialTimestamp = 0)
         {
+            /* Generate a list of actions to return */
+            List<ModelAction> actions = new List<ModelAction>();
+
             /* First set up the input neurons */
+            int timestamp = initialTimestamp;
             for(int i = 0; i < inputs.Length; i++)
             {
                 inputNeurons[i].Output = inputs[i];
                 inputNeurons[i].InferenceStepCount += 1;
+                actions.Add(new ModelAction(ModelActionType.CALCULATED_OUTPUT, inputNeurons[i], null, timestamp));
             }
 
             /* We can now perform an inference on the remaining neurons */
             int attemptCount = 0;
             List<Neuron> incomplete = new List<Neuron>();
             incomplete.AddRange(neuronList);
+            incomplete.RemoveAll(n => n.IsInputNeuron); //input neurons are done!
             while(attemptCount < MAX_ITERATIONS && incomplete.Count > 0)
             {
+                /* Increment the timestamp */
+                timestamp += 1;
+
                 /* Attempt to do an inference on each neuron. */
                 List<Neuron> completed = new List<Neuron>();
                 foreach(var neuron in incomplete)
                 {
+                    /* SLOW INFERENCE makes sure layers can only be computed one "layer" at a time */
+                    /* If slow inference is off, inference will usually take place in one loop, ruining the visual */
+                    /* Slow inference forces a neuron to compute only if its predecessor executed in an earlier loop */
+                    if (USE_SLOW_INFERENCE)
+                    {
+                        bool skipfornow = false;
+                        foreach(var pred in neuron.Incoming)
+                        {
+                            /* One of our predecessors completed. That implies we SHOULD NOT complete this loop */
+                            if (completed.Contains(pred))
+                            {
+                                skipfornow = true;
+                                break;
+                            }
+                        }
+                        if (skipfornow) continue; //we will come back to this node in the next loop
+                    }
+
+                    /* Attempt inference */
                     bool didInference = neuron.AttemptInference();
-                    if (didInference) completed.Add(neuron);
+                    if (didInference)
+                    {
+                        completed.Add(neuron);
+                        actions.Add(new ModelAction(ModelActionType.CALCULATED_OUTPUT, neuron, null, timestamp));
+                    }
                 }
                 
                 /* Remove completed neurons from the pool */
@@ -55,7 +88,14 @@ namespace neuronal
                 attemptCount++;
             }
 
-            if (attemptCount >= MAX_ITERATIONS) Debug.LogError("Inference Incomplete. Max iterations reached.");
+            if (attemptCount >= MAX_ITERATIONS)
+            {
+                Debug.LogError("Inference Incomplete. Max iterations reached");
+                Debug.LogError("MISSING NODES: " + string.Join(", ", incomplete));
+                return actions;
+            }
+
+            return actions;
         }
 
         public void DoBackpropagation(float[] expectedOutputs)
@@ -73,6 +113,7 @@ namespace neuronal
             int attemptCount = 0;
             List<Neuron> incomplete = new List<Neuron>();
             incomplete.AddRange(neuronList);
+            incomplete.RemoveAll(n => n.IsInputNeuron); //input neurons are not trainable (no parameters used)
             incomplete.RemoveAll(neuron => neuron.IsOutputNeuron); //output neurons are done. Input neurons are already absent from this list as well.
             while (attemptCount < MAX_ITERATIONS && incomplete.Count > 0)
             {

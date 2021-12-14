@@ -34,7 +34,7 @@ namespace neuronal
         #endregion
 
         #region MODEL
-        [Header("Model")]
+        [Header("Managers")]
         public NeuronModel Model;
         #endregion
 
@@ -91,6 +91,7 @@ namespace neuronal
                             if(firstAddition != null)
                             {
                                 neuron.InferenceStepCount = firstAddition.InferenceStepCount;
+                                neuron.BackpropStepCount = firstAddition.BackpropStepCount;
                             }
                             else
                             {
@@ -284,11 +285,11 @@ namespace neuronal
                                     connectionLine.SetPosition(1, clicked.transform.position);
                                     connectionLine.name = "LINE: " + clicked.name;
 
-                                    /* If we were successful, add a weight label */
-                                    var label = Instantiate(pf_Label, connectionSource.transform);
-                                    label.name = "Weight Label: " + clicked.name;
-                                    label.transform.position = Vector3.Lerp(connectionSource.transform.position, clicked.transform.position, 0.3f);
-                                    label.SetText(clicked.Weights[clicked.Incoming.IndexOf(connectionSource)], WeightLabelColor);
+                                    ///* If we were successful, add a weight label */
+                                    //var label = Instantiate(pf_Label, connectionSource.transform);
+                                    //label.name = "Weight Label: " + clicked.name;
+                                    //label.transform.position = Vector3.Lerp(connectionSource.transform.position, clicked.transform.position, 0.3f);
+                                    //label.SetText(clicked.Weights[clicked.Incoming.IndexOf(connectionSource)], WeightLabelColor);
                                 }
                             }
 
@@ -354,7 +355,10 @@ namespace neuronal
             Model.lastOutput = new float[] { datapoint.output };
 
             /* Perform an inference */
-            Model.DoInference(datapoint.inputs);
+            var actions = Model.DoInference(datapoint.inputs);
+
+            /* Display the inference slowly */
+            ActionDisplayManager.Instance.DisplayInference(actions);
         }
 
         public void OnBackpropagationPress()
